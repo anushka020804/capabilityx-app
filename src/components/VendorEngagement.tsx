@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { rfq } from '../data/mockData';
 import {
   useStore,
@@ -9,6 +9,7 @@ import {
   setVendorId,
   statusMeta,
   timeAgo,
+  removeInvite,
   type InviteStatus,
 } from '../data/rfqStore';
 
@@ -28,6 +29,12 @@ export default function VendorEngagement({ supplierId, supplierName }: Props) {
   const invite = store.invites.find((i) => i.supplierId === supplierId && i.rfqId === rfq.id);
   const liked = store.shortlisted.includes(supplierId);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      removeInvite(supplierId, rfq.id);
+    };
+  }, [supplierId]);
 
   const openVendorPortal = () => {
     setVendorId(supplierId);

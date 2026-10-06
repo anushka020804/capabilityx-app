@@ -20,6 +20,12 @@ export default function VendorDashboard() {
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      resetDemo();
+    };
+  }, []);
+
   const invites = useMemo(
     () => store.invites.filter((i) => i.supplierId === vendor.id).sort((a, b) => b.sentAt - a.sentAt),
     [store.invites, vendor.id],
@@ -75,11 +81,10 @@ export default function VendorDashboard() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         <Kpi label="Open invitations" value={open} accent="indigo" hint={`${fresh} unread`} />
         <Kpi label="Responses sent" value={responded} accent="sky" hint="this quarter" />
         <Kpi label="Accepted" value={won} accent="emerald" hint={responded ? `${Math.round((won / responded) * 100)}% acceptance` : '—'} />
-        <Kpi label="Capability score" value={vendor.score || '—'} accent="violet" hint="visible to buyers" />
       </div>
 
       {/* Inbox + detail */}

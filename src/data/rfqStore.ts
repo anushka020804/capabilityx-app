@@ -266,6 +266,13 @@ export function markViewed(inviteId: string) {
   });
 }
 
+export function removeInvite(supplierId: string, rfqId: string) {
+  update((s) => ({
+    ...s,
+    invites: s.invites.filter((i) => !(i.supplierId === supplierId && i.rfqId === rfqId)),
+  }));
+}
+
 export function respondToInvite(
   inviteId: string,
   status: 'accepted' | 'countered' | 'declined',

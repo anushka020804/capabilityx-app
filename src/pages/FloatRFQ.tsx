@@ -23,14 +23,7 @@ const SAMPLE: RFQData = {
   ],
 };
 
-type GenStep = 'form' | 'generating' | 'preview';
 
-const GEN_STAGES = [
-  'Understanding your requirements…',
-  'Inferring technical specifications…',
-  'Adding quality & compliance clauses…',
-  'Drafting commercial terms…',
-];
 
 export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
   const [rfq, setRfq] = useState<RFQData | null>(null);
@@ -39,18 +32,16 @@ export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
 
   // Generate modal state
   const [genOpen, setGenOpen] = useState(false);
-  const [genStep, setGenStep] = useState<GenStep>('form');
-  const [stageIdx, setStageIdx] = useState(0);
-  const [form, setForm] = useState({
-    part: '',
-    company: '',
-    quantity: '',
+  const draftData = {
+    part: 'Steel Mounting Bracket for Electric Vehicle Application',
+    company: 'VoltEdge Mobility Components Private Limited',
+    quantity: '10,000',
     material: 'Steel',
-    process: 'CNC Machining',
+    process: 'Sheet Metal Stamping',
     delivery: '30',
-    location: '',
+    location: 'Buyer Plant',
     notes: '',
-  });
+  };
 
   const loadFile = (file?: File) => {
     if (!file) return;
@@ -68,41 +59,12 @@ export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
   };
 
   const openGenerate = () => {
-    setGenStep('form');
-    setStageIdx(0);
     setGenOpen(true);
   };
 
-  const runGenerate = () => {
-    setGenStep('generating');
-    setStageIdx(0);
-    GEN_STAGES.forEach((_, i) => setTimeout(() => setStageIdx(i), i * 600));
-    setTimeout(() => setGenStep('preview'), GEN_STAGES.length * 600 + 300);
-  };
-
-  const canGenerate = form.part.trim() && form.quantity.trim();
-
   const draft = {
-    title: form.part || 'Custom Component',
-    id: 'RFQ-' + (2000 + form.part.length * 37),
-    sections: [
-      {
-        h: 'Scope of Supply',
-        body: `Supply of ${form.part || 'components'} manufactured via ${form.process} in ${form.material}, at a volume of ${form.quantity || '—'} units per month${form.company ? ` for ${form.company}` : ''}.`,
-      },
-      {
-        h: 'Technical Requirements',
-        body: `Material: ${form.material} (grade per IS/ASTM standard). Process: ${form.process}. General tolerance ±0.05 mm unless specified. Surface finish and coating as per drawing. ${form.notes}`,
-      },
-      {
-        h: 'Quality & Compliance',
-        body: 'Supplier must hold ISO 9001:2015 certification (IATF 16949 preferred). PPAP Level 3 submission, first-article inspection report and material test certificates required.',
-      },
-      {
-        h: 'Commercial Terms',
-        body: `Delivery lead time ≤ ${form.delivery} days from PO.${form.location ? ` Delivery to ${form.location}.` : ''} Payment terms: 60 days from invoice. Quote validity: 90 days. Prices to be quoted ex-works with packaging included.`,
-      },
-    ],
+    title: draftData.part,
+    id: 'RFQ-' + Math.floor(1000 + Math.random() * 9000),
   };
 
   const useDraft = () => {
@@ -111,10 +73,10 @@ export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
       id: draft.id,
       source: 'generated',
       fields: [
-        { label: 'Customer', value: form.company || '—' },
-        { label: 'Quantity', value: `${form.quantity} units / month` },
-        { label: 'Delivery', value: `≤ ${form.delivery} days` },
-        { label: 'Material', value: `${form.material} · ${form.process}` },
+        { label: 'Customer', value: draftData.company },
+        { label: 'Quantity', value: `${draftData.quantity} units / month` },
+        { label: 'Delivery', value: `≤ ${draftData.delivery} days` },
+        { label: 'Material', value: `${draftData.material} · ${draftData.process}` },
       ],
     });
     setGenOpen(false);
@@ -273,7 +235,7 @@ export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
       {genOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4"
-          onClick={() => genStep !== 'generating' && setGenOpen(false)}
+          onClick={() => setGenOpen(false)}
         >
           <div
             className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl animate-fade-in"
@@ -288,143 +250,66 @@ export default function FloatRFQ({ onAnalyze }: FloatRFQProps) {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Generate RFQ Template</div>
-                  <div className="text-xs text-gray-500">
-                    {genStep === 'form' && 'Tell us the basics — AI drafts the rest'}
-                    {genStep === 'generating' && 'Drafting your RFQ…'}
-                    {genStep === 'preview' && 'Review your AI-drafted RFQ'}
-                  </div>
+                  <div className="text-xs text-gray-500">Review your AI-drafted RFQ</div>
                 </div>
               </div>
-              {genStep !== 'generating' && (
-                <button onClick={() => setGenOpen(false)} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
-              )}
+              <button onClick={() => setGenOpen(false)} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
             </div>
 
-            {genStep === 'form' && (
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className={label}><span className="text-red-500">*</span> Part / Product name</label>
-                    <input className={input} placeholder="e.g. Aluminium Housing Cover" value={form.part} onChange={e => setForm({ ...form, part: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={label}>Company</label>
-                    <input className={input} placeholder="Your company" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={label}><span className="text-red-500">*</span> Monthly quantity</label>
-                    <input className={input} placeholder="e.g. 5,000" value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={label}>Material</label>
-                    <select className={input} value={form.material} onChange={e => setForm({ ...form, material: e.target.value })}>
-                      {['Steel', 'Stainless Steel', 'Aluminium', 'Brass', 'Plastic (ABS/PP)', 'Cast Iron'].map(m => <option key={m}>{m}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={label}>Manufacturing process</label>
-                    <select className={input} value={form.process} onChange={e => setForm({ ...form, process: e.target.value })}>
-                      {['CNC Machining', 'Sheet Metal Stamping', 'Casting', 'Forging', 'Injection Moulding', 'Fabrication & Welding'].map(m => <option key={m}>{m}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={label}>Delivery lead time (days)</label>
-                    <input className={input} type="number" value={form.delivery} onChange={e => setForm({ ...form, delivery: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={label}>Delivery location</label>
-                    <input className={input} placeholder="e.g. Pune, MH" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} />
-                  </div>
-                  <div className="col-span-2">
-                    <label className={label}>Additional notes</label>
-                    <textarea className={input + ' resize-none'} rows={3} placeholder="Tolerances, finish, certifications…" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+            <div className="p-6">
+              <div className="rounded-xl border border-gray-200 p-8 bg-white shadow-sm max-w-3xl mx-auto">
+                <div className="flex justify-end mb-4 border-b pb-2">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                    {draftData.company} | CONFIDENTIAL RFQ
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 mt-6">
-                  <button onClick={() => setGenOpen(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Cancel</button>
-                  <button
-                    disabled={!canGenerate}
-                    onClick={runGenerate}
-                    className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                  >
-                    ✨ Generate Template
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {genStep === 'generating' && (
-              <div className="p-10 flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full border-4 border-purple-100 border-t-purple-600 animate-spin mb-6" />
-                <div className="space-y-2 w-full max-w-xs">
-                  {GEN_STAGES.map((s, i) => (
-                    <div key={s} className={`flex items-center gap-2 text-sm transition-opacity ${i <= stageIdx ? 'opacity-100' : 'opacity-30'}`}>
-                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${i < stageIdx ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'}`}>
-                        {i < stageIdx ? '✓' : '•'}
-                      </span>
-                      <span className="text-gray-700">{s}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {genStep === 'preview' && (
-              <div className="p-6">
-                <div className="rounded-xl border border-gray-200 p-8 bg-white shadow-sm max-w-3xl mx-auto">
-                  <div className="flex justify-end mb-4 border-b pb-2">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                      {form.company || 'VOLTEDGE MOBILITY COMPONENTS PRIVATE LIMITED'} | CONFIDENTIAL RFQ
-                    </div>
-                  </div>
-                  <h1 className="text-3xl font-bold text-center text-gray-900 mb-4 font-serif">Request for Quotation</h1>
-                  <h2 className="text-lg font-bold text-center text-gray-800 mb-6 font-serif">{draft.title}</h2>
-                  
-                  <table className="w-full text-sm mb-6 border-collapse">
-                    <thead>
-                      <tr className="bg-[#1a365d] text-white">
-                        <th className="border border-[#1a365d] py-2 px-4 text-left w-1/3">RFQ detail</th>
-                        <th className="border border-[#1a365d] py-2 px-4 text-left">Requirement</th>
+                <h1 className="text-3xl font-bold text-center text-gray-900 mb-4 font-serif">Request for Quotation</h1>
+                <h2 className="text-lg font-bold text-center text-gray-800 mb-6 font-serif">{draft.title}</h2>
+                
+                <table className="w-full text-sm mb-6 border-collapse">
+                  <thead>
+                    <tr className="bg-[#1a365d] text-white">
+                      <th className="border border-[#1a365d] py-2 px-4 text-left w-1/3">RFQ detail</th>
+                      <th className="border border-[#1a365d] py-2 px-4 text-left">Requirement</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['Issuing company', draftData.company],
+                      ['RFQ reference', draft.id],
+                      ['Issue date', new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
+                      ['Quotation due', new Date(Date.now() + 14 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ' by 17:00 IST'],
+                      ['Indicative award date', new Date(Date.now() + 25 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
+                      ['Indicative start of production', new Date(Date.now() + 42 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ', subject to PPAP approval'],
+                      ['Contract quantity', `${draftData.quantity} production units over three months`],
+                      ['Delivery model', `JIT delivery to ${draftData.location} every three days`],
+                      ['Commercial terms', `INR, GST extra, freight included, payment 60 days`],
+                      ['RFQ contact', `Head Supply Chain, sourcing@${draftData.company.split(' ')[0].toLowerCase()}-example.com`],
+                    ].map(([k, v], i) => (
+                      <tr key={k} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="border border-gray-200 py-2 px-4 font-medium text-gray-900">{k}</td>
+                        <td className="border border-gray-200 py-2 px-4 text-gray-700">{v}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {[
-                        ['Issuing company', form.company || 'VoltEdge Mobility Components Private Limited'],
-                        ['RFQ reference', draft.id],
-                        ['Issue date', new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
-                        ['Quotation due', new Date(Date.now() + 14 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ' by 17:00 IST'],
-                        ['Indicative award date', new Date(Date.now() + 25 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
-                        ['Indicative start of production', new Date(Date.now() + 42 * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) + ', subject to PPAP approval'],
-                        ['Contract quantity', `${form.quantity || '10,000'} production units over three months`],
-                        ['Delivery model', `JIT delivery to ${form.location || 'buyer plant'} every three days`],
-                        ['Commercial terms', `INR, GST extra, freight included, payment 60 days`],
-                        ['RFQ contact', `Head Supply Chain, sourcing@${(form.company || 'voltedge').toLowerCase().replace(/\s+/g, '')}-example.com`],
-                      ].map(([k, v], i) => (
-                        <tr key={k} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-200 py-2 px-4 font-medium text-gray-900">{k}</td>
-                          <td className="border border-gray-200 py-2 px-4 text-gray-700">{v}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    ))}
+                  </tbody>
+                </table>
 
-                  <div className="text-sm text-gray-800 space-y-4 leading-relaxed font-serif">
-                    <p>
-                      This document invites qualified {form.process.toLowerCase()} suppliers to submit a complete technical and commercial quotation for an automotive {form.material.toLowerCase()} component. The selected supplier must demonstrate capable manufacturing processes, stable quality systems, adequate liquidity for a 60-day payment cycle, and reliable JIT supply.
-                    </p>
-                    <p>
-                      All names, references, dates and specifications in this sample RFQ are illustrative. The released drawing, approved material specification and purchase order will prevail over this document where expressly stated.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between gap-3 mt-6">
-                  <button onClick={() => setGenStep('form')} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">← Edit details</button>
-                  <button onClick={useDraft} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gray-900 hover:bg-black transition">
-                    Use this RFQ →
-                  </button>
+                <div className="text-sm text-gray-800 space-y-4 leading-relaxed font-serif">
+                  <p>
+                    This document invites qualified {draftData.process.toLowerCase()} suppliers to submit a complete technical and commercial quotation for an automotive {draftData.material.toLowerCase()} component. The selected supplier must demonstrate capable manufacturing processes, stable quality systems, adequate liquidity for a 60-day payment cycle, and reliable JIT supply.
+                  </p>
+                  <p>
+                    All names, references, dates and specifications in this sample RFQ are illustrative. The released drawing, approved material specification and purchase order will prevail over this document where expressly stated.
+                  </p>
                 </div>
               </div>
-            )}
+              <div className="flex justify-end gap-3 mt-6">
+                <button onClick={() => setGenOpen(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Cancel</button>
+                <button onClick={useDraft} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-gray-900 hover:bg-black transition">
+                  Use this RFQ →
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
