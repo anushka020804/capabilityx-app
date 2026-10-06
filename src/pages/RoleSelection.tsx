@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 interface RoleSelectionProps {
   onBuyer: () => void;
   onFI: () => void;
+  onVendor?: () => void;
   onBack: () => void;
 }
 
-export default function RoleSelection({ onBuyer, onFI, onBack }: RoleSelectionProps) {
-  const [hovered, setHovered] = useState<'buyer' | 'fi' | null>(null);
+export default function RoleSelection({ onBuyer, onFI, onVendor, onBack }: RoleSelectionProps) {
+  const [hovered, setHovered] = useState<'buyer' | 'fi' | 'vendor' | null>(null);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -46,7 +47,7 @@ export default function RoleSelection({ onBuyer, onFI, onBack }: RoleSelectionPr
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto relative z-10">
           {/* Buyer */}
           <div
             className={`group rounded-2xl border-2 p-10 cursor-pointer transition-all duration-300 flex flex-col bg-white ${
@@ -138,6 +139,51 @@ export default function RoleSelection({ onBuyer, onFI, onBack }: RoleSelectionPr
               </div>
             </div>
           </div>
+
+          {/* Vendor */}
+          {onVendor && (
+            <div
+              className={`group rounded-2xl border-2 p-10 cursor-pointer transition-all duration-300 flex flex-col bg-white ${
+                hovered === 'vendor'
+                  ? 'border-emerald-600 shadow-2xl shadow-emerald-600/10 -translate-y-1'
+                  : 'border-gray-200 hover:border-gray-300 shadow-sm'
+              }`}
+              onMouseEnter={() => setHovered('vendor')}
+              onMouseLeave={() => setHovered(null)}
+              onClick={onVendor}
+            >
+              <div
+                className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-8 transition-colors duration-300 ${
+                  hovered === 'vendor' ? 'bg-emerald-600' : 'bg-emerald-50'
+                }`}
+              >
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={hovered === 'vendor' ? 'white' : '#059669'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 20h20M4 20V10l5 3V10l5 3V6l6 4v10" />
+                  <path d="M8 16h1M13 16h1M18 16h1" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold mb-3 text-gray-900 group-hover:text-emerald-600 transition-colors">
+                  Supplier / Vendor
+                </h2>
+                <p className="text-base leading-relaxed text-gray-500 mb-6">
+                  I manufacture and supply. I want to receive RFQ invitations from buyers, check my fit and respond with a quote.
+                </p>
+              </div>
+              <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+                <span className={`text-sm font-bold tracking-wider uppercase ${hovered === 'vendor' ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  Enter Vendor Portal
+                </span>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                  hovered === 'vendor' ? 'bg-emerald-100 text-emerald-600 translate-x-2' : 'bg-gray-50 text-gray-400'
+                }`}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

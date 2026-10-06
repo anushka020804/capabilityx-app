@@ -8,7 +8,9 @@ import SupplierDetail from './pages/SupplierDetail';
 import CapabilityGraph from './pages/CapabilityGraph';
 import FIDashboard from './pages/FIDashboard';
 import RFQAnalysis from './pages/RFQAnalysis';
+import VendorDashboard from './pages/VendorDashboard';
 import AppShell from './components/AppShell';
+import { Toaster } from './components/NotificationCenter';
 
 type Screen =
   | 'landing'
@@ -22,6 +24,7 @@ type Screen =
   | 'supplier-shree'
   | 'capability-graph'
   | 'fi-dashboard'
+  | 'vendor-dashboard'
   | 'reports';
 
 const SHELL_SCREENS: Screen[] = [
@@ -36,7 +39,9 @@ export default function App() {
     const hash = window.location.hash.replace('#', '') as Screen;
     return hash || 'landing';
   });
-  const [role, setRole] = useState<'buyer' | 'fi'>('buyer');
+  const [roleState, setRole] = useState<'buyer' | 'fi' | 'vendor'>('buyer');
+  // The vendor portal can be opened directly (e.g. in a new tab from the buyer view)
+  const role = screen === 'vendor-dashboard' ? 'vendor' : roleState === 'vendor' ? 'buyer' : roleState;
   const [graphSupplier, setGraphSupplier] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,6 +83,7 @@ export default function App() {
           <RoleSelection
             onBuyer={() => { setRole('buyer'); nav('buyer-dashboard'); }}
             onFI={() => { setRole('fi'); nav('fi-dashboard'); }}
+            onVendor={() => { setRole('vendor'); nav('vendor-dashboard'); }}
             onBack={() => nav('landing')}
           />
         );
@@ -113,6 +119,8 @@ export default function App() {
         return <CapabilityGraph initialSupplierId={graphSupplier} />;
       case 'fi-dashboard':
         return <FIDashboard />;
+      case 'vendor-dashboard':
+        return <VendorDashboard />;
       case 'reports':
         return <ReportsPlaceholder />;
       default:
@@ -144,9 +152,10 @@ export default function App() {
   return (
     <>
       {backButton}
+      {role !== 'fi' && <Toaster audience={role === 'vendor' ? 'vendor' : 'buyer'} />}
       <AppShell
         screen={screen}
-        onNavigate={nav}
+        onNavigate={(s) => nav(s as Screen)}
         role={role}
       >
         {renderContent()}

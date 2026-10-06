@@ -1,15 +1,18 @@
 import React from 'react';
+import { suppliers } from '../data/mockData';
+import { useVendorId } from '../data/rfqStore';
+import { NotificationBell } from './NotificationCenter';
 
 type Screen =
   | 'landing' | 'role-select' | 'buyer-dashboard' | 'float-rfq'
-  | 'ai-analysis' | 'shortlist' | 'supplier-apex' | 'supplier-bharat'
-  | 'supplier-shree' | 'capability-graph' | 'fi-dashboard' | 'reports';
+  | 'ai-analysis' | 'rfq-analysis' | 'shortlist' | 'supplier-apex' | 'supplier-bharat'
+  | 'supplier-shree' | 'capability-graph' | 'fi-dashboard' | 'vendor-dashboard' | 'reports';
 
 interface AppShellProps {
   screen: Screen;
   onNavigate: (screen: Screen) => void;
   children: React.ReactNode;
-  role: 'buyer' | 'fi';
+  role: 'buyer' | 'fi' | 'vendor';
 }
 
 const navItems = [
@@ -23,8 +26,18 @@ const fiNavItems = [
   { id: 'shortlist', label: 'SME Network', icon: UsersIcon },
 ];
 
+const vendorNavItems = [
+  { id: 'vendor-dashboard', label: 'RFQ Inbox', icon: FileIcon },
+];
+
 export default function AppShell({ screen, onNavigate, children, role }: AppShellProps) {
-  const items = role === 'fi' ? fiNavItems : navItems;
+  const items = role === 'fi' ? fiNavItems : role === 'vendor' ? vendorNavItems : navItems;
+  const [vendorId] = useVendorId();
+  const vendor = suppliers.find((s) => s.id === vendorId) ?? suppliers[0];
+  const user =
+    role === 'vendor'
+      ? { initials: vendor.name.split(' ').map((w) => w[0]).join('').slice(0, 2), name: vendor.name, sub: 'Vendor' }
+      : { initials: 'AM', name: 'Acme Manufacturing', sub: 'Procurement' };
   const activeBase = screen === 'supplier-apex' || screen === 'supplier-bharat' || screen === 'supplier-shree'
     ? 'shortlist'
     : screen === 'ai-analysis' || screen === 'rfq-analysis'
@@ -70,17 +83,22 @@ export default function AppShell({ screen, onNavigate, children, role }: AppShel
               </button>
             );
           })}
+          {role !== 'fi' && (
+            <div className="pt-3 mt-3 border-t border-gray-100">
+              <NotificationBell audience={role === 'vendor' ? 'vendor' : 'buyer'} />
+            </div>
+          )}
         </nav>
 
         {/* User */}
         <div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center rounded-full text-xs font-semibold shrink-0 w-8 h-8 bg-indigo-100 text-indigo-700">
-              AM
+            <div className={`flex items-center justify-center rounded-full text-xs font-semibold shrink-0 w-8 h-8 ${role === 'vendor' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
+              {user.initials}
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-medium truncate text-gray-900">Acme Manufacturing</div>
-              <div className="text-xs truncate text-gray-500">Procurement</div>
+              <div className="text-xs font-medium truncate text-gray-900">{user.name}</div>
+              <div className="text-xs truncate text-gray-500">{user.sub}</div>
             </div>
           </div>
         </div>

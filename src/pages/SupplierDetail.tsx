@@ -1,6 +1,7 @@
 import React from 'react';
 import { suppliers } from '../data/mockData';
 import CapabilityDataPoints from '../components/CapabilityDataPoints';
+import VendorEngagement from '../components/VendorEngagement';
 
 interface SupplierDetailProps {
   supplierId: string;
@@ -64,7 +65,7 @@ export default function SupplierDetail({ supplierId, onBack, onViewGraph }: Supp
     : supplier.status === 'PARTIAL MATCH' ? 'bg-amber-100' : 'bg-red-100';
 
   return (
-    <div className="p-8 animate-fade-in w-full max-w-6xl mx-auto">
+    <div className="p-8 animate-fade-in w-full max-w-6xl mx-auto relative">
       {/* Top Actions */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -112,7 +113,7 @@ export default function SupplierDetail({ supplierId, onBack, onViewGraph }: Supp
             </div>
           </div>
           {!isNogo ? (
-            <div className="text-right">
+            <div className="text-right flex flex-col items-end">
               <div className="text-6xl font-bold text-gray-900 tracking-[-0.03em]">
                 {supplier.score}
               </div>
@@ -128,6 +129,9 @@ export default function SupplierDetail({ supplierId, onBack, onViewGraph }: Supp
           )}
         </div>
       </div>
+
+      {/* Buyer ⇄ Vendor engagement */}
+      {!isNogo && <VendorEngagement supplierId={supplierId} supplierName={supplier.name} />}
 
       {/* No-go explanation */}
       {isNogo && supplier.failedMandatory && (

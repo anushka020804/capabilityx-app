@@ -91,6 +91,20 @@ body {
   to { width: var(--target-width); }
 }
 
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(5deg); }
+}
+
 .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
 .animate-fade-in-fast { animation: fadeInFast 0.3s ease forwards; }
 .animate-slide-left { animation: slideInLeft 0.35s ease forwards; }
